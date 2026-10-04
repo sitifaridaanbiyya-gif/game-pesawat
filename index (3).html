@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cosmic Vanguard - Game Space Galaxy Shooter seru dengan grafis neon, upgrade senjata, gelombang musuh, dan boss battle epik.">
+  <title>Cosmic Vanguard | Galaxy Shooter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="game-wrapper">
+    <!-- Game Canvas -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Top HUD Overlay -->
+    <header id="game-hud" class="hud-layer hidden">
+      <div class="hud-left">
+        <div class="stat-box">
+          <span class="stat-label">SKOR</span>
+          <span id="score-display" class="stat-value">0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">HIGH SCORE</span>
+          <span id="highscore-display" class="stat-value">0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">WAVE</span>
+          <span id="wave-display" class="stat-value">1</span>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <!-- Boss Bar (Visible during boss fight) -->
+        <div id="boss-hud-container" class="boss-hud hidden">
+          <div class="boss-info">
+            <span id="boss-name" class="boss-title">ALERT: TITAN DREADNOUGHT</span>
+            <span id="boss-hp-text" class="boss-hp-label">100%</span>
+          </div>
+          <div class="boss-bar-outer">
+            <div id="boss-hp-bar" class="boss-bar-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hud-right">
+        <!-- Health & Shield Gauge -->
+        <div class="gauge-group">
+          <div class="gauge-row">
+            <span class="gauge-label">HULL</span>
+            <div class="bar-track">
+              <div id="hull-bar" class="bar-fill hull"></div>
+            </div>
+          </div>
+          <div class="gauge-row">
+            <span class="gauge-label">SHIELD</span>
+            <div class="bar-track">
+              <div id="shield-bar" class="bar-fill shield"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bomb Inventory -->
+        <div class="bomb-counter">
+          <span class="bomb-label">BOMB [B]</span>
+          <div id="bomb-icons" class="bomb-slots">
+            <span class="bomb-dot active"></span>
+            <span class="bomb-dot active"></span>
+            <span class="bomb-dot active"></span>
+          </div>
+        </div>
+
+        <!-- Audio & Pause Controls -->
+        <div class="hud-btns">
+          <button id="btn-audio-toggle" class="icon-btn" aria-label="Toggle Suara" title="Toggle Suara">
+            <span id="audio-icon">🔊</span>
+          </button>
+          <button id="btn-pause" class="icon-btn" aria-label="Pause Game" title="Pause Game">
+            <span>⏸️</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Start / Main Menu Screen -->
+    <div id="start-screen" class="ui-screen active">
+      <div class="screen-glass-panel">
+        <div class="badge-tag">ARCADE SCI-FI SHOOTER</div>
+        <h1 class="game-title">COSMIC<br><span class="title-highlight">VANGUARD</span></h1>
+        <p class="subtitle">Pertahankan galaksi dari invasi armada alien cyborg dan kalahkan Dreadnought Boss!</p>
+
+        <div class="controls-card">
+          <h3>🎮 KONTROL PERMAINAN</h3>
+          <div class="control-grid">
+            <div class="control-item">
+              <span class="key-badge">W A S D</span> atau <span class="key-badge">⬆️ ⬅️ ⬇️ ➡️</span>
+              <span class="key-desc">Navigasi Pesawat</span>
+            </div>
+            <div class="control-item">
+              <span class="key-badge">SPASI</span> / <span class="key-badge">Klik Kiri</span>
+              <span class="key-desc">Tembak Senjata</span>
+            </div>
+            <div class="control-item">
+              <span class="key-badge">B</span> atau <span class="key-badge">Tombol Bomb</span>
+              <span class="key-desc">Nova Super Bomb</span>
+            </div>
+            <div class="control-item">
+              <span class="key-badge">Sentuh / Geser</span>
+              <span class="key-desc">Mendukung Layar HP & Tablet</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="start-actions">
+          <button id="btn-start-game" class="btn-primary glow-pulse">
+            <span class="btn-text">LUNCURKAN MISI</span>
+            <span class="btn-icon">🚀</span>
+          </button>
+        </div>
+
+        <div class="high-score-footer">
+          <span>Skor Tertinggi Kamu: </span>
+          <strong id="start-highscore-val">0</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pause Menu Screen -->
+    <div id="pause-screen" class="ui-screen hidden">
+      <div class="screen-glass-panel compact">
+        <h2 class="modal-title">GAME DIJEDA</h2>
+        <p class="pause-desc">Sistem pesawat dalam kondisi standby.</p>
+        <div class="modal-buttons">
+          <button id="btn-resume-game" class="btn-primary">
+            <span>LANJUTKAN [ESC]</span>
+          </button>
+          <button id="btn-restart-from-pause" class="btn-secondary">
+            <span>MULAI ULANG</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="ui-screen hidden">
+      <div class="screen-glass-panel">
+        <div class="alert-icon-wrap">💥</div>
+        <h2 class="gameover-title">PESAWAT HANCUR</h2>
+        <p class="gameover-sub">Misi pertahanan galaksi terputus.</p>
+
+        <div class="stats-summary-card">
+          <div class="summary-row">
+            <span>Skor Akhir</span>
+            <strong id="final-score" class="highlight-val">0</strong>
+          </div>
+          <div class="summary-row">
+            <span>Gelombang Terakhir</span>
+            <strong id="final-wave">Wave 1</strong>
+          </div>
+          <div class="summary-row">
+            <span>Musuh Dieliminasi</span>
+            <strong id="final-kills">0</strong>
+          </div>
+          <div class="summary-row highlight">
+            <span>Rekor Terbaik</span>
+            <strong id="final-highscore" class="gold-val">0</strong>
+          </div>
+        </div>
+
+        <div class="gameover-actions">
+          <button id="btn-restart-game" class="btn-primary glow-pulse">
+            <span>MAIN LAGI</span>
+            <span>🔄</span>
+          </button>
+          <button id="btn-home" class="btn-secondary">
+            <span>MENU UTAMA</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Victory Screen (Boss Defeated) -->
+    <div id="victory-screen" class="ui-screen hidden">
+      <div class="screen-glass-panel">
+        <div class="alert-icon-wrap victory">👑</div>
+        <h2 class="victory-title">GALAKSI SELAMAT!</h2>
+        <p class="victory-sub">Titan Dreadnought berhasil dihancurkan!</p>
+
+        <div class="stats-summary-card">
+          <div class="summary-row">
+            <span>Skor Kemenangan</span>
+            <strong id="victory-score" class="highlight-val">0</strong>
+          </div>
+          <div class="summary-row highlight">
+            <span>Rekor Terbaik</span>
+            <strong id="victory-highscore" class="gold-val">0</strong>
+          </div>
+        </div>
+
+        <div class="gameover-actions">
+          <button id="btn-continue-endless" class="btn-primary glow-pulse">
+            <span>MODE ENDLESS</span>
+            <span>⚡</span>
+          </button>
+          <button id="btn-victory-home" class="btn-secondary">
+            <span>MENU UTAMA</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Touch On-Screen Controls (Visible on mobile/touch screens) -->
+    <div id="touch-controls" class="touch-layer hidden">
+      <div id="touch-dpad-hint" class="touch-hint">Geser jari untuk menggerakkan pesawat</div>
+      <div class="touch-action-buttons">
+        <button id="btn-touch-bomb" class="touch-btn-bomb" aria-label="Gunakan Bomb">
+          💣
+        </button>
+        <button id="btn-touch-shoot" class="touch-btn-shoot active" aria-label="Tembak">
+          🔥
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
